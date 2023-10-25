@@ -28,9 +28,12 @@ word_tokens = nltk.word_tokenize(raw)# converts to list of words
 
 # Preprocessing
 lemmer = WordNetLemmatizer()
+# Take the list of tokens and lemmatize each token (reduce words to their base or dictionary form) using WordNetLemmatizer from NLTK.
 def LemTokens(tokens):
     return [lemmer.lemmatize(token) for token in tokens]
+# Remove punctuation from text
 remove_punct_dict = dict((ord(punct), None) for punct in string.punctuation)
+#  Tokenize the input text into words, convert them to lowercase, and then lemmatizes the words while removing punctuation.
 def LemNormalize(text):
     return LemTokens(nltk.word_tokenize(text.lower().translate(remove_punct_dict)))
 
@@ -50,14 +53,17 @@ def greeting(sentence):
 def response(user_response):
     robo_response=''
     sent_tokens.append(user_response)
-    TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english')
+    TfidfVec = TfidfVectorizer(tokenizer=LemNormalize, stop_words='english') #Uses TF-IDF vectorization to convert the sent_tokens into a TF-IDF matrix, where each row represents a sentence from sent_tokens.
+
     tfidf = TfidfVec.fit_transform(sent_tokens)
-    vals = cosine_similarity(tfidf[-1], tfidf)
+    vals = cosine_similarity(tfidf[-1], tfidf) # Calculates the cosine similarity between the TF-IDF vector of the user's input and all other sentences.
+    # Identifies the sentence with the highest cosine similarity (excluding the user's input itself).
+
     idx=vals.argsort()[0][-2]
     flat = vals.flatten()
     flat.sort()
     req_tfidf = flat[-2]
-    if(req_tfidf==0):
+    if(req_tfidf==0): # If the highest cosine similarity is 0, it means the chatbot couldn't find a suitable response.
         robo_response=robo_response+"I am sorry! I don't understand you"
         return robo_response
     else:
